@@ -7556,6 +7556,34 @@ a.invoice-row {
   min-width: 0;
 }
 
+/* Keep the copy control adjacent to the invoice number without moving the
+   header when its short confirmation appears or disappears. */
+.preview-header__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.preview-header__copy-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.preview-header__copy-feedback {
+  display: inline-block;
+  width: 5.5rem;
+  font-size: 0.75rem;
+  color: var(--color-success-text);
+  white-space: nowrap;
+}
+
+.preview-header__copy-feedback--error {
+  color: var(--danger);
+}
+
 .preview-header__meta {
   margin: 6px 0 0;
 }
