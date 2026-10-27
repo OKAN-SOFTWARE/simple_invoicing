@@ -6,7 +6,8 @@ describe('copyToClipboard', () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
 
     await expect(copyToClipboard(' INV-0042 / A ', { writeText })).resolves.toBe(true);
-    expect(writeText).toHaveBeenCalledExactlyOnceWith(' INV-0042 / A ');
+    expect(writeText).toHaveBeenCalledTimes(1);
+    expect(writeText).toHaveBeenCalledWith(' INV-0042 / A ');
   });
 
   test('reports permission rejection without throwing', async () => {
