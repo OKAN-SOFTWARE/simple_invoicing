@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Download, Mail, Printer, Share2 } from 'lucide-react';
+import { Check, Copy, Download, Mail, Printer, Share2 } from 'lucide-react';
 import { useEscapeClose } from '../hooks/useEscapeClose';
 import api, { getApiErrorMessage } from '../api/client';
 import type { Invoice } from '../types/api';
 import { formatInvoiceDateLabel } from '../utils/invoiceDueDate.ts';
 import formatCurrency from '../utils/formatting';
+import { copyToClipboard } from '../utils/copyToClipboard';
 import SendEmailModal from './SendEmailModal';
 import ShareModal from './ShareModal';
 import PreviewToolbar from './PreviewToolbar';
@@ -25,6 +26,7 @@ export default function InvoicePreview({ invoice, onClose, onError }: InvoicePre
   const [loadingPdf, setLoadingPdf] = useState(true);
   const [pdfError, setPdfError] = useState('');
   const [previewFailed, setPreviewFailed] = useState(false);
+  const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'failed'>('idle');
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   // The email and share modals stacked on top close themselves on Escape;
@@ -109,6 +111,18 @@ export default function InvoicePreview({ invoice, onClose, onError }: InvoicePre
   };
 
   const invoiceLabel = invoice.invoice_number || `#${invoice.id}`;
+  async function handleCopyInvoiceNumber() {
+    setCopyStatus('idle');
+    const copied = await copyToClipboard(invoiceLabel, navigator.clipboard);
+    setCopyStatus(copied ? 'copied' : 'failed');
+  }
+
+  useEffect(() => {
+    if (copyStatus === 'idle') return;
+    const timeout = window.setTimeout(() => setCopyStatus('idle'), 2000);
+    return () => window.clearTimeout(timeout);
+  }, [copyStatus]);
+
   // The backend reads voucher_type off the invoice, so one share button covers
   // both books — only the wording the customer reads has to change.
   const documentNoun = invoice.voucher_type === 'purchase' ? 'Purchase invoice' : 'Invoice';
@@ -119,7 +133,25 @@ export default function InvoicePreview({ invoice, onClose, onError }: InvoicePre
         <PreviewToolbar
           eyebrow="Invoice preview"
           titleId="invoice-preview-title"
-          title={`${documentNoun} ${invoice.invoice_number || `#${invoice.id}`}`}
+          title={`${documentNoun} ${invoiceLabel}`}
+          titleAction={
+            <div className="preview-header__copy-control">
+              <button
+                type="button"
+                className="button button--ghost button--icon"
+                onClick={() => void handleCopyInvoiceNumber()}
+                title="Copy invoice number"
+                aria-label="Copy invoice number"
+              >
+                {copyStatus === 'copied'
+                  ? <Check size={16} aria-hidden="true" />
+                  : <Copy size={16} aria-hidden="true" />}
+              </button>
+              <span className={`preview-header__copy-feedback${copyStatus === 'failed' ? ' preview-header__copy-feedback--error' : ''}`} role="status" aria-live="polite">
+                {copyStatus === 'copied' ? 'Copied' : copyStatus === 'failed' ? 'Copy failed' : ''}
+              </span>
+            </div>
+          }
           meta={
             <>
               {formatInvoiceDateLabel(invoice.invoice_date)}
