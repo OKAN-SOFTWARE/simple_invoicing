@@ -1,7 +1,12 @@
-from pydantic_settings import BaseSettings
-from pydantic import model_validator
+import logging
 import os
 from pathlib import Path
+
+from pydantic import model_validator
+from pydantic_settings import BaseSettings
+
+
+logger = logging.getLogger(__name__)
 
 
 # Detect environment from ENVIRONMENT variable, default to development
@@ -149,8 +154,8 @@ class Settings(BaseSettings):
         ]
         if bad:
             object.__setattr__(self, "MCP_ENABLED", False)
-            print(
-                "⚠️  MCP disabled: " + " and ".join(bad) + " must be set to the "
+            logger.warning(
+                "⚠️  MCP disabled:  + " and ".join(bad) + " must be set to the "
                 "public https:// origin(s) of this deployment. The app is running "
                 "normally; MCP and OAuth endpoints are not mounted."
             )
