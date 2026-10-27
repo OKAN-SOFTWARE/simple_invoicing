@@ -155,7 +155,7 @@ class Settings(BaseSettings):
         if bad:
             object.__setattr__(self, "MCP_ENABLED", False)
             logger.warning(
-                "⚠️  MCP disabled:  + " and ".join(bad) + " must be set to the "
+                "⚠️  MCP disabled: " + " and ".join(bad) + " must be set to the "
                 "public https:// origin(s) of this deployment. The app is running "
                 "normally; MCP and OAuth endpoints are not mounted."
             )
